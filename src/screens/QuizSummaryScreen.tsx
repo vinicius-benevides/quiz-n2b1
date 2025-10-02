@@ -1,12 +1,18 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import Svg, { Circle } from 'react-native-svg';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { Header } from '../components/Header';
 import { Screen } from '../components/Screen';
-import { palette, radius, spacing, typography } from '../theme';
+import { palette, spacing, typography } from '../theme';
 import { RootStackParamList } from '../navigation/types';
+
+const CIRCLE_SIZE = 140;
+const STROKE_WIDTH = 10;
+const RADIUS = (CIRCLE_SIZE - STROKE_WIDTH) / 2;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const QuizSummaryScreen = ({ navigation, route }: NativeStackScreenProps<RootStackParamList, 'QuizSummary'>) => {
   const { results, theme } = route.params;
@@ -18,6 +24,9 @@ const QuizSummaryScreen = ({ navigation, route }: NativeStackScreenProps<RootSta
     return { correct: correctAnswers, percentage: pct };
   }, [results]);
 
+  const progress = Math.min(Math.max(percentage / 100, 0), 1);
+  const strokeDashoffset = CIRCUMFERENCE * (1 - progress);
+
   return (
     <Screen>
       <Header title="Resumo do quiz" subtitle={theme.name} onBackPress={() => navigation.goBack()} />
@@ -25,7 +34,31 @@ const QuizSummaryScreen = ({ navigation, route }: NativeStackScreenProps<RootSta
       <Card>
         <View style={styles.scoreWrapper}>
           <View style={styles.scoreCircle}>
-            <Text style={styles.scoreValue}>{percentage}%</Text>
+            <Svg width={CIRCLE_SIZE} height={CIRCLE_SIZE}>
+              <Circle
+                cx={CIRCLE_SIZE / 2}
+                cy={CIRCLE_SIZE / 2}
+                r={RADIUS}
+                stroke="rgba(255,255,255,0.1)"
+                strokeWidth={STROKE_WIDTH}
+                fill="none"
+              />
+              <Circle
+                cx={CIRCLE_SIZE / 2}
+                cy={CIRCLE_SIZE / 2}
+                r={RADIUS}
+                stroke={palette.secondary}
+                strokeWidth={STROKE_WIDTH}
+                strokeLinecap="round"
+                strokeDasharray={`${CIRCUMFERENCE} ${CIRCUMFERENCE}`}
+                strokeDashoffset={strokeDashoffset}
+                fill="none"
+                transform={`rotate(-90 ${CIRCLE_SIZE / 2} ${CIRCLE_SIZE / 2})`}
+              />
+            </Svg>
+            <View style={styles.scoreValueWrapper} pointerEvents="none">
+              <Text style={styles.scoreValue}>{percentage}%</Text>
+            </View>
           </View>
           <View style={styles.scoreText}>
             <Text style={styles.scoreHighlight}>{correct} acertos</Text>
@@ -71,14 +104,15 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   scoreCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: radius.pill,
-    borderWidth: 8,
-    borderColor: palette.secondary,
+    width: CIRCLE_SIZE,
+    height: CIRCLE_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0, 208, 255, 0.08)',
+  },
+  scoreValueWrapper: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   scoreValue: {
     ...typography.title,
@@ -137,4 +171,3 @@ const styles = StyleSheet.create({
 });
 
 export default QuizSummaryScreen;
-
