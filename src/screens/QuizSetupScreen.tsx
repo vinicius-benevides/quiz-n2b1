@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button } from '../components/Button';
@@ -26,6 +26,8 @@ const QuizSetupScreen = () => {
       setThemes(data);
       if (data.length > 0) {
         setSelectedThemeId((prev) => prev ?? data[0].id);
+      } else {
+        setSelectedThemeId(null);
       }
     } finally {
       setLoading(false);
@@ -38,7 +40,10 @@ const QuizSetupScreen = () => {
     }, [loadThemes])
   );
 
-  const selectedTheme = useMemo(() => themes.find((theme) => theme.id === selectedThemeId) ?? null, [themes, selectedThemeId]);
+  const selectedTheme = useMemo(
+    () => themes.find((theme) => theme.id === selectedThemeId) ?? null,
+    [themes, selectedThemeId]
+  );
 
   useEffect(() => {
     if (!selectedTheme) {
@@ -53,13 +58,14 @@ const QuizSetupScreen = () => {
   }, [selectedTheme, questionAmount]);
 
   const maxQuestions = selectedTheme ? Math.max(selectedTheme.questionCount ?? 0, 0) : 0;
-  const validAmount = Math.min(questionAmount, maxQuestions);
+  const validAmount = Math.min(questionAmount, maxQuestions || questionAmount);
 
   const handleIncrease = () => {
-    if (selectedTheme) {
-      const available = selectedTheme.questionCount ?? questionAmount + 1;
-      setQuestionAmount((value) => Math.min(value + 1, available));
+    if (!selectedTheme) {
+      return;
     }
+    const available = selectedTheme.questionCount ?? questionAmount + 1;
+    setQuestionAmount((value) => Math.min(value + 1, Math.max(available, 1)));
   };
 
   const handleDecrease = () => {
@@ -95,22 +101,24 @@ const QuizSetupScreen = () => {
   };
 
   return (
-    <Screen scrollable={false}>
+    <Screen contentContainerStyle={styles.container}>
       <Header title="Preparar quiz" subtitle="Escolha o tema e a quantidade de perguntas" />
 
       {loading && themes.length === 0 ? (
         <Card>
           <ActivityIndicator color={palette.secondary} />
         </Card>
+      ) : themes.length === 0 ? (
+        <EmptyState
+          title="Nenhum tema disponivel"
+          description="Cadastre temas e perguntas antes de iniciar o quiz."
+        />
       ) : (
-        <FlatList
-          data={themes}
-          keyExtractor={(item) => String(item.id)}
-          contentContainerStyle={themes.length === 0 ? styles.emptyList : styles.themeList}
-          renderItem={({ item }) => {
+        <View style={styles.themeList}>
+          {themes.map((item) => {
             const isSelected = item.id === selectedThemeId;
             return (
-              <TouchableOpacity onPress={() => setSelectedThemeId(item.id)}>
+              <TouchableOpacity key={item.id} onPress={() => setSelectedThemeId(item.id)}>
                 <Card style={[styles.themeCard, isSelected ? styles.themeCardActive : null]}>
                   <View style={styles.themeRow}>
                     <Text style={styles.themeName}>{item.name}</Text>
@@ -120,14 +128,8 @@ const QuizSetupScreen = () => {
                 </Card>
               </TouchableOpacity>
             );
-          }}
-          ListEmptyComponent={() => (
-            <EmptyState
-              title="Nenhum tema disponivel"
-              description="Cadastre temas e perguntas antes de iniciar o quiz."
-            />
-          )}
-        />
+          })}
+        </View>
       )}
 
       {selectedTheme ? (
@@ -162,12 +164,11 @@ const QuizSetupScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    gap: spacing.lg,
+  },
   themeList: {
     gap: spacing.lg,
-    paddingBottom: spacing.lg,
-  },
-  emptyList: {
-    paddingVertical: spacing.xl,
   },
   themeCard: {
     gap: spacing.sm,
@@ -231,4 +232,3 @@ const styles = StyleSheet.create({
 });
 
 export default QuizSetupScreen;
-

@@ -1,8 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   Alert,
-  FlatList,
   Modal,
+  RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -24,6 +24,7 @@ const presetColors = ['#7C4DFF', '#00D0FF', '#FFB92E', '#FF5252', '#4CAF50', '#F
 const ThemesScreen = () => {
   const [themes, setThemes] = useState<Theme[]>([]);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingTheme, setEditingTheme] = useState<Theme | null>(null);
   const [name, setName] = useState('');
@@ -31,15 +32,27 @@ const ThemesScreen = () => {
   const [color, setColor] = useState(presetColors[0]);
   const [error, setError] = useState<string | null>(null);
 
-  const loadThemes = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await listThemes();
-      setThemes(data);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const loadThemes = useCallback(
+    async (options: { silent?: boolean } = {}) => {
+      const { silent = false } = options;
+      if (silent) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      try {
+        const data = await listThemes();
+        setThemes(data);
+      } finally {
+        if (silent) {
+          setRefreshing(false);
+        } else {
+          setLoading(false);
+        }
+      }
+    },
+    []
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -55,17 +68,20 @@ const ThemesScreen = () => {
     setError(null);
   }, []);
 
-  const openModal = useCallback((theme?: Theme) => {
-    if (theme) {
-      setEditingTheme(theme);
-      setName(theme.name);
-      setDescription(theme.description ?? '');
-      setColor(theme.color);
-    } else {
-      resetForm();
-    }
-    setModalVisible(true);
-  }, [resetForm]);
+  const openModal = useCallback(
+    (theme?: Theme) => {
+      if (theme) {
+        setEditingTheme(theme);
+        setName(theme.name);
+        setDescription(theme.description ?? '');
+        setColor(theme.color);
+      } else {
+        resetForm();
+      }
+      setModalVisible(true);
+    },
+    [resetForm]
+  );
 
   const closeModal = useCallback(() => {
     setModalVisible(false);
@@ -97,7 +113,7 @@ const ThemesScreen = () => {
       }
 
       closeModal();
-      await loadThemes();
+      await loadThemes({ silent: true });
     } catch (err) {
       if (err instanceof ThemeNameConflictError) {
         setError('Ja existe um tema com esse nome. Escolha outro.');
@@ -110,9 +126,6 @@ const ThemesScreen = () => {
   };
 
   const handleDelete = (theme: Theme) => {
-    // eslint-disable-next-line no-console
-    console.log('[ThemesScreen] Confirming deletion for theme', theme.id);
-
     Alert.alert(
       'Excluir tema',
       'Tem certeza que deseja excluir este tema e todas as suas perguntas?',
@@ -124,7 +137,7 @@ const ThemesScreen = () => {
           onPress: async () => {
             console.log('[ThemesScreen] Deleting theme', theme.id);
             await deleteTheme(theme.id);
-            await loadThemes();
+            await loadThemes({ silent: true });
           },
         },
       ]
@@ -136,49 +149,59 @@ const ThemesScreen = () => {
     [themes]
   );
 
-  const renderItem = ({ item }: { item: Theme }) => (
-    <Card style={styles.themeCard}>
-      <View style={styles.themeHeader}>
-        <View style={[styles.colorBadge, { backgroundColor: item.color }]} />
-        <View style={styles.themeInfo}>
-          <Text style={styles.themeName}>{item.name}</Text>
-          {item.description ? <Text style={styles.themeDescription}>{item.description}</Text> : null}
-        </View>
-      </View>
-      <View style={styles.themeFooter}>
-        <Text style={styles.themeCount}>
-          {item.questionCount ?? 0} {item.questionCount === 1 ? 'pergunta' : 'perguntas'}
-        </Text>
-        <View style={styles.themeActions}>
-          <TouchableOpacity onPress={() => openModal(item)}>
-            <Text style={styles.edit}>Editar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleDelete(item)}>
-            <Text style={styles.delete}>Excluir</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Card>
-  );
-
   return (
-    <Screen scrollable={false}>
+    <Screen
+      contentContainerStyle={styles.container}
+      scrollProps={{
+        refreshControl: (
+          <RefreshControl
+            colors={[palette.secondary]}
+            tintColor={palette.secondary}
+            refreshing={refreshing}
+            onRefresh={() => loadThemes({ silent: true })}
+          />
+        ),
+      }}
+    >
       <Header title="Temas" subtitle="Organize os assuntos do quiz" right={<Button title="Novo tema" onPress={() => openModal()} />} />
 
-      <FlatList
-        data={sortedThemes}
-        keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={sortedThemes.length === 0 ? styles.emptyList : styles.listContent}
-        renderItem={renderItem}
-        ListEmptyComponent={() => (
-          <EmptyState
-            title="Nenhum tema cadastrado"
-            description="Crie um tema para comecar a montar suas perguntas."
-          />
-        )}
-        refreshing={loading}
-        onRefresh={loadThemes}
-      />
+      {loading && themes.length === 0 ? (
+        <Card>
+          <Text style={styles.loadingText}>Carregando temas...</Text>
+        </Card>
+      ) : sortedThemes.length === 0 ? (
+        <EmptyState
+          title="Nenhum tema cadastrado"
+          description="Crie um tema para comecar a montar suas perguntas."
+        />
+      ) : (
+        <View style={styles.themeList}>
+          {sortedThemes.map((item) => (
+            <Card key={item.id} style={styles.themeCard}>
+              <View style={styles.themeHeader}>
+                <View style={[styles.colorBadge, { backgroundColor: item.color }]} />
+                <View style={styles.themeInfo}>
+                  <Text style={styles.themeName}>{item.name}</Text>
+                  {item.description ? <Text style={styles.themeDescription}>{item.description}</Text> : null}
+                </View>
+              </View>
+              <View style={styles.themeFooter}>
+                <Text style={styles.themeCount}>
+                  {item.questionCount ?? 0} {item.questionCount === 1 ? 'pergunta' : 'perguntas'}
+                </Text>
+                <View style={styles.themeActions}>
+                  <TouchableOpacity onPress={() => openModal(item)}>
+                    <Text style={styles.edit}>Editar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleDelete(item)}>
+                    <Text style={styles.delete}>Excluir</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Card>
+          ))}
+        </View>
+      )}
 
       <Modal animationType="slide" transparent visible={modalVisible} onRequestClose={closeModal}>
         <View style={styles.modalBackdrop}>
@@ -206,7 +229,11 @@ const ThemesScreen = () => {
                 {presetColors.map((itemColor) => (
                   <TouchableOpacity
                     key={itemColor}
-                    style={[styles.colorOption, { backgroundColor: itemColor }, color === itemColor ? styles.colorOptionSelected : null]}
+                    style={[
+                      styles.colorOption,
+                      { backgroundColor: itemColor },
+                      color === itemColor ? styles.colorOptionSelected : null,
+                    ]}
                     onPress={() => setColor(itemColor)}
                   />
                 ))}
@@ -224,12 +251,14 @@ const ThemesScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  listContent: {
-    paddingBottom: spacing.xl,
+  container: {
     gap: spacing.lg,
   },
-  emptyList: {
-    paddingVertical: spacing.xl,
+  loadingText: {
+    ...typography.caption,
+    textAlign: 'center',
+  },
+  themeList: {
     gap: spacing.lg,
   },
   themeCard: {

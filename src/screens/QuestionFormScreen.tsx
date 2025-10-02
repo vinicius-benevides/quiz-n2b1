@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
@@ -55,14 +55,18 @@ const QuestionFormScreen = ({ navigation, route }: NativeStackScreenProps<RootSt
   }, [questionId]);
 
   const handleSelectCorrect = (index: number) => {
-    setAlternatives((prev) => prev.map((item, itemIndex) => ({
-      ...item,
-      isCorrect: itemIndex === index,
-    })));
+    setAlternatives((prev) =>
+      prev.map((item, itemIndex) => ({
+        ...item,
+        isCorrect: itemIndex === index,
+      }))
+    );
   };
 
   const handleChangeAlternative = (index: number, value: string) => {
-    setAlternatives((prev) => prev.map((item, itemIndex) => (itemIndex === index ? { ...item, text: value } : item)));
+    setAlternatives((prev) =>
+      prev.map((item, itemIndex) => (itemIndex === index ? { ...item, text: value } : item))
+    );
   };
 
   const validate = () => {
@@ -130,54 +134,53 @@ const QuestionFormScreen = ({ navigation, route }: NativeStackScreenProps<RootSt
   };
 
   return (
-    <Screen scrollable={false}>
+    <Screen contentContainerStyle={styles.container}>
       <Header title={questionId ? 'Editar pergunta' : 'Nova pergunta'} subtitle={theme ? theme.name : 'Carregando tema...'} />
-      <ScrollView contentContainerStyle={styles.content}>
-        <Card>
-          <TextField
-            label="Enunciado"
-            value={statement}
-            onChangeText={(value) => {
-              setStatement(value);
-              if (error) {
-                setError(null);
-              }
-            }}
-            placeholder="Informe o enunciado da pergunta"
-            multiline
-            error={error}
-          />
-          <TextField
-            label="Explicacao (opcional)"
-            value={explanation}
-            onChangeText={setExplanation}
-            placeholder="Use este campo para registrar um comentario ou explicacao"
-            multiline
-          />
-        </Card>
 
-        <Card>
-          <Text style={styles.sectionTitle}>Alternativas</Text>
-          <Text style={styles.sectionSubtitle}>
-            Toque no marcador ao lado para definir a alternativa correta. Cada pergunta precisa de quatro alternativas.
-          </Text>
+      <Card>
+        <TextField
+          label="Enunciado"
+          value={statement}
+          onChangeText={(value) => {
+            setStatement(value);
+            if (error) {
+              setError(null);
+            }
+          }}
+          placeholder="Informe o enunciado da pergunta"
+          multiline
+          error={error}
+        />
+        <TextField
+          label="Explicacao (opcional)"
+          value={explanation}
+          onChangeText={setExplanation}
+          placeholder="Use este campo para registrar um comentario ou explicacao"
+          multiline
+        />
+      </Card>
 
-          {alternatives.map((alternative, index) => (
-            <View key={index} style={styles.alternativeRow}>
-              <TouchableOpacity
-                style={[styles.radio, alternative.isCorrect ? styles.radioActive : null]}
-                onPress={() => handleSelectCorrect(index)}
-              />
-              <TextField
-                value={alternative.text}
-                onChangeText={(value) => handleChangeAlternative(index, value)}
-                placeholder={`Alternativa ${index + 1}`}
-                style={styles.alternativeInput}
-              />
-            </View>
-          ))}
-        </Card>
-      </ScrollView>
+      <Card>
+        <Text style={styles.sectionTitle}>Alternativas</Text>
+        <Text style={styles.sectionSubtitle}>
+          Toque no marcador ao lado para definir a alternativa correta. Cada pergunta precisa de quatro alternativas.
+        </Text>
+
+        {alternatives.map((alternative, index) => (
+          <View key={index} style={styles.alternativeRow}>
+            <TouchableOpacity
+              style={[styles.radio, alternative.isCorrect ? styles.radioActive : null]}
+              onPress={() => handleSelectCorrect(index)}
+            />
+            <TextField
+              value={alternative.text}
+              onChangeText={(value) => handleChangeAlternative(index, value)}
+              placeholder={`Alternativa ${index + 1}`}
+              style={styles.alternativeInput}
+            />
+          </View>
+        ))}
+      </Card>
 
       <View style={styles.footer}>
         <Button title="Cancelar" variant="ghost" onPress={() => navigation.goBack()} />
@@ -188,7 +191,7 @@ const QuestionFormScreen = ({ navigation, route }: NativeStackScreenProps<RootSt
 };
 
 const styles = StyleSheet.create({
-  content: {
+  container: {
     gap: spacing.lg,
   },
   sectionTitle: {
@@ -225,7 +228,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: spacing.md,
     gap: spacing.md,
+    marginTop: 'auto',
   },
 });
 
 export default QuestionFormScreen;
+
+
+
+

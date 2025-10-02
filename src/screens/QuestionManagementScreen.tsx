@@ -108,7 +108,7 @@ const QuestionManagementScreen = () => {
   };
 
   return (
-    <Screen scrollable={false}>
+    <Screen contentContainerStyle={styles.container}>
       <Header
         title="Perguntas"
         subtitle="Mantenha seu banco de perguntas sempre atualizado"
@@ -208,6 +208,9 @@ const QuestionManagementScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    gap: spacing.lg,
+  },
   sectionTitle: {
     ...typography.subtitle,
     color: palette.text,
@@ -290,3 +293,5 @@ const styles = StyleSheet.create({
 });
 
 export default QuestionManagementScreen;
+
+

@@ -70,7 +70,7 @@ const QuizPlayScreen = ({ navigation, route }: NativeStackScreenProps<RootStackP
   };
 
   return (
-    <Screen scrollable={false}>
+    <Screen contentContainerStyle={styles.container}>
       <Header
         title={theme.name}
         subtitle={`Pergunta ${currentIndex + 1} de ${questions.length}`}
@@ -144,8 +144,10 @@ const QuizPlayScreen = ({ navigation, route }: NativeStackScreenProps<RootStackP
 };
 
 const styles = StyleSheet.create({
+  container: {
+    gap: spacing.lg,
+  },
   questionWrapper: {
-    flex: 1,
     gap: spacing.lg,
   },
   statement: {
@@ -211,3 +213,7 @@ const styles = StyleSheet.create({
 });
 
 export default QuizPlayScreen;
+
+
+
+
