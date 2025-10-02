@@ -57,18 +57,24 @@ const QuizSetupScreen = () => {
     }
   }, [selectedTheme, questionAmount]);
 
-  const maxQuestions = selectedTheme ? Math.max(selectedTheme.questionCount ?? 0, 0) : 0;
+  const availableQuestions = selectedTheme?.questionCount ?? 0;
+  const maxQuestions = selectedTheme ? Math.max(availableQuestions, 0) : 0;
   const validAmount = Math.min(questionAmount, maxQuestions || questionAmount);
 
+  const canDecrease = validAmount > 1;
+  const canIncrease = selectedTheme ? validAmount < availableQuestions : false;
+
   const handleIncrease = () => {
-    if (!selectedTheme) {
+    if (!canIncrease || !selectedTheme) {
       return;
     }
-    const available = selectedTheme.questionCount ?? questionAmount + 1;
-    setQuestionAmount((value) => Math.min(value + 1, Math.max(available, 1)));
+    setQuestionAmount((value) => Math.min(value + 1, availableQuestions));
   };
 
   const handleDecrease = () => {
+    if (!canDecrease) {
+      return;
+    }
     setQuestionAmount((value) => Math.max(1, value - 1));
   };
 
@@ -140,21 +146,33 @@ const QuizSetupScreen = () => {
         <Card>
           <Text style={styles.sectionTitle}>Quantidade de perguntas</Text>
           <Text style={styles.sectionSubtitle}>
-            {selectedTheme.questionCount ?? 0} perguntas cadastradas neste tema.
+            {availableQuestions > 0
+              ? `${availableQuestions} ${availableQuestions == 1 ? 'pergunta cadastrada' : 'perguntas cadastradas'} neste tema.`
+              : 'Nenhuma pergunta cadastrada neste tema.'}
           </Text>
 
-          <View style={styles.stepper}>
-            <TouchableOpacity style={styles.stepButton} onPress={handleDecrease}>
-              <Text style={styles.stepButtonLabel}>-</Text>
-            </TouchableOpacity>
-            <View style={styles.stepValueWrapper}>
-              <Text style={styles.stepValue}>{validAmount}</Text>
-              <Text style={styles.stepLabel}>perguntas</Text>
+          {availableQuestions > 0 ? (
+            <View style={styles.stepper}>
+              <TouchableOpacity
+                style={[styles.stepButton, !canDecrease && styles.stepButtonDisabled]}
+                onPress={handleDecrease}
+                disabled={!canDecrease}
+              >
+                <Text style={[styles.stepButtonLabel, !canDecrease && styles.stepButtonLabelDisabled]}>-</Text>
+              </TouchableOpacity>
+              <View style={styles.stepValueWrapper}>
+                <Text style={styles.stepValue}>{validAmount}</Text>
+                <Text style={styles.stepLabel}>{validAmount == 1 ? 'pergunta' : 'perguntas'}</Text>
+              </View>
+              <TouchableOpacity
+                style={[styles.stepButton, !canIncrease && styles.stepButtonDisabled]}
+                onPress={handleIncrease}
+                disabled={!canIncrease}
+              >
+                <Text style={[styles.stepButtonLabel, !canIncrease && styles.stepButtonLabelDisabled]}>+</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.stepButton} onPress={handleIncrease}>
-              <Text style={styles.stepButtonLabel}>+</Text>
-            </TouchableOpacity>
-          </View>
+          ) : null}
 
           <Button
             title={loading ? 'Carregando...' : 'Iniciar quiz'}
@@ -218,9 +236,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  stepButtonDisabled: {
+    opacity: 0.4,
+  },
   stepButtonLabel: {
     fontSize: 24,
     color: palette.text,
+  },
+  stepButtonLabelDisabled: {
+    color: palette.textMuted,
   },
   stepValueWrapper: {
     alignItems: 'center',

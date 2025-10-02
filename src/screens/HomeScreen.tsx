@@ -61,7 +61,7 @@ const HomeScreen = () => {
 
   return (
     <Screen>
-      <Header title="Quiz N2B1" subtitle="Construa quizzes incrivelmente rapidos" />
+      <Header title="Quiz N2B1" subtitle="Construa seu próprio Quiz" />
 
       <Card>
         {loading ? (

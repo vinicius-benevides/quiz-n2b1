@@ -152,10 +152,10 @@ const QuestionFormScreen = ({ navigation, route }: NativeStackScreenProps<RootSt
           error={error}
         />
         <TextField
-          label="Explicacao (opcional)"
+          label="Explicação (opcional)"
           value={explanation}
           onChangeText={setExplanation}
-          placeholder="Use este campo para registrar um comentario ou explicacao"
+          placeholder="Use este campo para registrar um comentário ou explicação"
           multiline
         />
       </Card>
@@ -207,7 +207,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
+    maxWidth: '90%',
   },
   radio: {
     width: 24,

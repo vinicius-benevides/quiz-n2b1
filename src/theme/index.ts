@@ -33,16 +33,19 @@ export const typography = {
     fontSize: 28,
     fontWeight: '700' as const,
     letterSpacing: 0.4,
+    color: palette.text,
   },
   subtitle: {
     fontSize: 18,
     fontWeight: '500' as const,
     letterSpacing: 0.2,
+    color: palette.text,
   },
   body: {
     fontSize: 16,
     fontWeight: '400' as const,
     lineHeight: 22,
+    color: palette.text,
   },
   caption: {
     fontSize: 14,

@@ -166,7 +166,7 @@ const ThemesScreen = () => {
         ),
       }}
     >
-      <Header title="Temas" subtitle="Organize os assuntos do quiz" onBackPress={() => navigation.goBack()} right={<Button title="Novo tema" onPress={() => openModal()} />} />
+      <Header title="Temas" subtitle="Organize os temas" onBackPress={() => navigation.goBack()} right={<Button title="Novo tema" onPress={() => openModal()} />} />
 
       {loading && themes.length === 0 ? (
         <Card>
@@ -324,6 +324,7 @@ const styles = StyleSheet.create({
     ...typography.subtitle,
     fontSize: 20,
     textAlign: 'center',
+    color: palette.text,
   },
   colorsContainer: {
     gap: spacing.sm,

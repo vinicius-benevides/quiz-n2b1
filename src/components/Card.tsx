@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import { gradients, radius, shadows } from '../theme';
+import { gradients, radius, shadows, spacing } from '../theme';
 import { LinearGradient } from 'expo-linear-gradient';
 
 type Props = {
@@ -28,5 +28,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     overflow: 'hidden',
     padding: 20,
+    gap: spacing.sm,
   },
 });

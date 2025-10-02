@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
 import { initializeDatabase } from './src/database';
-import { palette, typography } from './src/theme';
+import { palette, spacing, typography } from './src/theme';
 
 export default function App() {
   const [ready, setReady] = useState(false);
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     backgroundColor: palette.background,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 16,
+    gap: spacing.md,
   },
   splashText: {
     ...typography.subtitle,
