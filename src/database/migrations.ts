@@ -1,4 +1,4 @@
-import { SQLiteDatabase } from 'react-native-sqlite-storage';
+import { DatabaseConnection } from "./connection";
 
 const statements = [
   `PRAGMA foreign_keys = ON;`,
@@ -28,7 +28,7 @@ const statements = [
   `CREATE INDEX IF NOT EXISTS idx_alternative_question ON alternatives(question_id);`
 ];
 
-export async function applyMigrations(db: SQLiteDatabase) {
+export async function applyMigrations(db: DatabaseConnection) {
   for (const statement of statements) {
     await db.executeSql(statement);
   }

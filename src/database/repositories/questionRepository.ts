@@ -81,18 +81,21 @@ export async function createQuestion(payload: NewQuestion): Promise<QuestionWith
       [payload.themeId, payload.statement.trim(), payload.explanation ?? null]
     );
 
-    const questionId = insertResult.insertId;
+    const insertedId = insertResult.insertId;
+    if (insertedId === undefined) {
+      throw new Error('Failed to retrieve the inserted question id.');
+    }
 
     for (const alternative of payload.alternatives) {
       await db.executeSql(
         `INSERT INTO alternatives (question_id, text, is_correct) VALUES (?, ?, ?);`,
-        [questionId, alternative.text.trim(), alternative.isCorrect ? 1 : 0]
+        [insertedId, alternative.text.trim(), alternative.isCorrect ? 1 : 0]
       );
     }
 
     await db.executeSql('COMMIT;');
 
-    return (await getQuestionWithAlternatives(questionId))!;
+    return (await getQuestionWithAlternatives(insertedId))!;
   } catch (error) {
     await db.executeSql('ROLLBACK;');
     throw error;

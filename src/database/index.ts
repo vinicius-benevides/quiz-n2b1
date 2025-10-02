@@ -1,5 +1,4 @@
-import { getDatabase } from './connection';
-import { applyMigrations } from './migrations';
+import { getDatabase } from "./connection";
 
 let initialized = false;
 
@@ -8,12 +7,12 @@ export async function initializeDatabase() {
     return;
   }
 
-  const db = await getDatabase();
-  await applyMigrations(db);
+  await getDatabase();
   initialized = true;
 }
 
-export * from './connection';
-export * from './repositories/themeRepository';
-export * from './repositories/questionRepository';
-export * from './repositories/quizRepository';
+export * from "./connection";
+export * from "./repositories/themeRepository";
+export * from "./repositories/questionRepository";
+export * from "./repositories/quizRepository";
+export * from "./errors";

@@ -16,7 +16,7 @@ import { Header } from '../components/Header';
 import { Screen } from '../components/Screen';
 import TextField from '../components/TextField';
 import { palette, radius, spacing, typography } from '../theme';
-import { createTheme, deleteTheme, listThemes, updateTheme } from '../database';
+import { createTheme, deleteTheme, listThemes, ThemeNameConflictError, updateTheme } from '../database';
 import { Theme } from '../types';
 
 const presetColors = ['#7C4DFF', '#00D0FF', '#FFB92E', '#FF5252', '#4CAF50', '#FF6F91'];
@@ -73,6 +73,9 @@ const ThemesScreen = () => {
   }, [resetForm]);
 
   const handleSave = async () => {
+    // eslint-disable-next-line no-console
+    console.log('[ThemesScreen] Saving theme', { editingTheme, name, description, color });
+
     if (!name.trim()) {
       setError('Informe um nome para o tema.');
       return;
@@ -96,11 +99,20 @@ const ThemesScreen = () => {
       closeModal();
       await loadThemes();
     } catch (err) {
+      if (err instanceof ThemeNameConflictError) {
+        setError('Ja existe um tema com esse nome. Escolha outro.');
+        return;
+      }
+
+      console.error('[ThemesScreen] Failed to save theme', err);
       setError('Nao foi possivel salvar o tema. Verifique se o nome ja esta em uso.');
     }
   };
 
   const handleDelete = (theme: Theme) => {
+    // eslint-disable-next-line no-console
+    console.log('[ThemesScreen] Confirming deletion for theme', theme.id);
+
     Alert.alert(
       'Excluir tema',
       'Tem certeza que deseja excluir este tema e todas as suas perguntas?',
@@ -110,6 +122,7 @@ const ThemesScreen = () => {
           text: 'Excluir',
           style: 'destructive',
           onPress: async () => {
+            console.log('[ThemesScreen] Deleting theme', theme.id);
             await deleteTheme(theme.id);
             await loadThemes();
           },
