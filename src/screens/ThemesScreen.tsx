@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { EmptyState } from '../components/EmptyState';
@@ -18,10 +18,13 @@ import TextField from '../components/TextField';
 import { palette, radius, spacing, typography } from '../theme';
 import { createTheme, deleteTheme, listThemes, ThemeNameConflictError, updateTheme } from '../database';
 import { Theme } from '../types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
 
 const presetColors = ['#7C4DFF', '#00D0FF', '#FFB92E', '#FF5252', '#4CAF50', '#FF6F91'];
 
 const ThemesScreen = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [themes, setThemes] = useState<Theme[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -163,7 +166,7 @@ const ThemesScreen = () => {
         ),
       }}
     >
-      <Header title="Temas" subtitle="Organize os assuntos do quiz" right={<Button title="Novo tema" onPress={() => openModal()} />} />
+      <Header title="Temas" subtitle="Organize os assuntos do quiz" onBackPress={() => navigation.goBack()} right={<Button title="Novo tema" onPress={() => openModal()} />} />
 
       {loading && themes.length === 0 ? (
         <Card>
@@ -352,3 +355,12 @@ const styles = StyleSheet.create({
 });
 
 export default ThemesScreen;
+
+
+
+
+
+
+
+
+

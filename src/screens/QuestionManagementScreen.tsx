@@ -112,6 +112,7 @@ const QuestionManagementScreen = () => {
       <Header
         title="Perguntas"
         subtitle="Mantenha seu banco de perguntas sempre atualizado"
+        onBackPress={() => navigation.goBack()}
         right={
           <Button
             title="Nova pergunta"
@@ -293,5 +294,6 @@ const styles = StyleSheet.create({
 });
 
 export default QuestionManagementScreen;
+
 
 

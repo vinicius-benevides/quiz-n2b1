@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button } from '../components/Button';
@@ -135,7 +135,7 @@ const QuestionFormScreen = ({ navigation, route }: NativeStackScreenProps<RootSt
 
   return (
     <Screen contentContainerStyle={styles.container}>
-      <Header title={questionId ? 'Editar pergunta' : 'Nova pergunta'} subtitle={theme ? theme.name : 'Carregando tema...'} />
+      <Header title={questionId ? 'Editar pergunta' : 'Nova pergunta'} subtitle={theme ? theme.name : 'Carregando tema...'} onBackPress={() => navigation.goBack()} />
 
       <Card>
         <TextField
@@ -233,6 +233,7 @@ const styles = StyleSheet.create({
 });
 
 export default QuestionFormScreen;
+
 
 
 

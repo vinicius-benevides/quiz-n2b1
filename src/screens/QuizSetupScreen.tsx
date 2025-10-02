@@ -102,7 +102,7 @@ const QuizSetupScreen = () => {
 
   return (
     <Screen contentContainerStyle={styles.container}>
-      <Header title="Preparar quiz" subtitle="Escolha o tema e a quantidade de perguntas" />
+      <Header title="Preparar quiz" subtitle="Escolha o tema e a quantidade de perguntas" onBackPress={() => navigation.goBack()} />
 
       {loading && themes.length === 0 ? (
         <Card>
@@ -232,3 +232,4 @@ const styles = StyleSheet.create({
 });
 
 export default QuizSetupScreen;
+

@@ -20,7 +20,7 @@ const QuizSummaryScreen = ({ navigation, route }: NativeStackScreenProps<RootSta
 
   return (
     <Screen>
-      <Header title="Resumo do quiz" subtitle={theme.name} />
+      <Header title="Resumo do quiz" subtitle={theme.name} onBackPress={() => navigation.goBack()} />
 
       <Card>
         <View style={styles.scoreWrapper}>
@@ -137,3 +137,4 @@ const styles = StyleSheet.create({
 });
 
 export default QuizSummaryScreen;
+
