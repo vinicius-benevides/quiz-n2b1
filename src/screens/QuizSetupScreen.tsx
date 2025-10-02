@@ -72,6 +72,10 @@ const QuizSetupScreen = () => {
     setQuestionAmount((value) => Math.max(1, value - 1));
   };
 
+  const handleBack = () => {
+    navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+  };
+
   const handlePlay = async () => {
     if (!selectedTheme) {
       Alert.alert('Selecione um tema', 'Escolha um tema para iniciar o quiz.');
@@ -102,7 +106,7 @@ const QuizSetupScreen = () => {
 
   return (
     <Screen contentContainerStyle={styles.container}>
-      <Header title="Preparar quiz" subtitle="Escolha o tema e a quantidade de perguntas" onBackPress={() => navigation.goBack()} />
+      <Header title="Preparar quiz" subtitle="Escolha o tema e a quantidade de perguntas" onBackPress={handleBack} />
 
       {loading && themes.length === 0 ? (
         <Card>
@@ -232,4 +236,3 @@ const styles = StyleSheet.create({
 });
 
 export default QuizSetupScreen;
-

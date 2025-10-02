@@ -21,7 +21,7 @@ export function Header({ title, subtitle, right, onBackPress }: Props) {
             activeOpacity={0.7}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
-            <FontAwesome name="chevron-left" style={styles.backIcon} size={24} />
+            <FontAwesome name="chevron-left" style={styles.backIcon} size={16} />
           </TouchableOpacity>
         ) : null}
         <View style={styles.texts}>
