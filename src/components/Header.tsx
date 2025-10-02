@@ -29,7 +29,7 @@ export function Header({ title, subtitle, right, onBackPress }: Props) {
           {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
         </View>
       </View>
-      {right ? <View>{right}</View> : null}
+      {right ? <View style={styles.right}>{right}</View> : null}
     </View>
   );
 }
@@ -68,5 +68,8 @@ const styles = StyleSheet.create({
   },
   backIcon: {
     color: palette.secondary,
+  },
+  right: {
+    width: 130,
   },
 });

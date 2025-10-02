@@ -1,5 +1,5 @@
-﻿import React, { useEffect, useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
@@ -27,6 +27,10 @@ const QuestionFormScreen = ({ navigation, route }: NativeStackScreenProps<RootSt
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const statementRef = useRef<TextInput>(null);
+  const explanationRef = useRef<TextInput>(null);
+  const alternativeRefs = useRef<Array<TextInput | null>>([]);
+
   useEffect(() => {
     (async () => {
       const themeData = await getTheme(themeId);
@@ -53,6 +57,13 @@ const QuestionFormScreen = ({ navigation, route }: NativeStackScreenProps<RootSt
       );
     })();
   }, [questionId]);
+
+  const focusAlternative = (index: number) => {
+    const input = alternativeRefs.current[index];
+    if (input) {
+      input.focus();
+    }
+  };
 
   const handleSelectCorrect = (index: number) => {
     setAlternatives((prev) =>
@@ -91,6 +102,15 @@ const QuestionFormScreen = ({ navigation, route }: NativeStackScreenProps<RootSt
 
     setError(null);
     return true;
+  };
+
+  const handleNavigateToNextAlternative = (currentIndex: number) => {
+    const nextIndex = currentIndex + 1;
+    if (nextIndex < alternatives.length) {
+      focusAlternative(nextIndex);
+      return;
+    }
+    Keyboard.dismiss();
   };
 
   const handleSubmit = async () => {
@@ -134,11 +154,12 @@ const QuestionFormScreen = ({ navigation, route }: NativeStackScreenProps<RootSt
   };
 
   return (
-    <Screen contentContainerStyle={styles.container}>
+    <Screen contentContainerStyle={styles.container} avoidKeyboard keyboardOffset={spacing.xl}>
       <Header title={questionId ? 'Editar pergunta' : 'Nova pergunta'} subtitle={theme ? theme.name : 'Carregando tema...'} onBackPress={() => navigation.goBack()} />
 
       <Card>
         <TextField
+          ref={statementRef}
           label="Enunciado"
           value={statement}
           onChangeText={(value) => {
@@ -150,13 +171,20 @@ const QuestionFormScreen = ({ navigation, route }: NativeStackScreenProps<RootSt
           placeholder="Informe o enunciado da pergunta"
           multiline
           error={error}
+          returnKeyType="next"
+          submitBehavior="blurAndSubmit"
+          onSubmitEditing={() => explanationRef.current?.focus()}
         />
         <TextField
+          ref={explanationRef}
           label="Explicação (opcional)"
           value={explanation}
           onChangeText={setExplanation}
           placeholder="Use este campo para registrar um comentário ou explicação"
           multiline
+          returnKeyType="next"
+          submitBehavior="blurAndSubmit"
+          onSubmitEditing={() => focusAlternative(0)}
         />
       </Card>
 
@@ -173,10 +201,16 @@ const QuestionFormScreen = ({ navigation, route }: NativeStackScreenProps<RootSt
               onPress={() => handleSelectCorrect(index)}
             />
             <TextField
+              ref={(input) => {
+                alternativeRefs.current[index] = input;
+              }}
               value={alternative.text}
               onChangeText={(value) => handleChangeAlternative(index, value)}
               placeholder={`Alternativa ${index + 1}`}
               style={styles.alternativeInput}
+              returnKeyType={index === alternatives.length - 1 ? 'done' : 'next'}
+              submitBehavior={index === alternatives.length - 1 ? 'blurAndSubmit' : 'submit'}
+              onSubmitEditing={() => handleNavigateToNextAlternative(index)}
             />
           </View>
         ))}
@@ -234,8 +268,3 @@ const styles = StyleSheet.create({
 });
 
 export default QuestionFormScreen;
-
-
-
-
-

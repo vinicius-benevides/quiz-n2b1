@@ -1,5 +1,14 @@
 import React, { ReactNode } from "react";
-import { ScrollView, ScrollViewProps, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  ScrollViewProps,
+  StyleProp,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { palette, spacing } from "../theme";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -10,6 +19,8 @@ type Props = {
   paddingTop?: number;
   contentContainerStyle?: StyleProp<ViewStyle>;
   scrollProps?: Omit<ScrollViewProps, "contentContainerStyle">;
+  avoidKeyboard?: boolean;
+  keyboardOffset?: number;
 };
 
 export function Screen({
@@ -18,13 +29,18 @@ export function Screen({
   paddingTop = spacing.lg,
   contentContainerStyle,
   scrollProps,
+  avoidKeyboard = false,
+  keyboardOffset = 0,
 }: Props) {
   const containerStyle = [styles.scrollContent, { paddingTop }, contentContainerStyle];
+  const mergedScrollProps = {
+    keyboardShouldPersistTaps: "handled" as ScrollViewProps["keyboardShouldPersistTaps"],
+    ...(scrollProps ?? {}),
+  };
 
   const content = scrollable ? (
     <ScrollView
-      {...scrollProps}
-      keyboardShouldPersistTaps="handled"
+      {...mergedScrollProps}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={containerStyle}
     >
@@ -34,15 +50,31 @@ export function Screen({
     <View style={containerStyle}>{children}</View>
   );
 
+  const safeContent = <SafeAreaView style={styles.safe}>{content}</SafeAreaView>;
+  const body = avoidKeyboard ? (
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={keyboardOffset}
+    >
+      {safeContent}
+    </KeyboardAvoidingView>
+  ) : (
+    safeContent
+  );
+
   return (
     <LinearGradient colors={[palette.background, "#0B0D13"]} style={styles.gradient}>
-      <SafeAreaView style={styles.safe}>{content}</SafeAreaView>
+      {body}
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   gradient: {
+    flex: 1,
+  },
+  flex: {
     flex: 1,
   },
   safe: {
